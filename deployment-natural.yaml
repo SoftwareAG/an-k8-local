@@ -1,0 +1,71 @@
+kind: ConfigMap 
+apiVersion: v1 
+metadata:
+  name: nat-configmap 
+data:
+  # Configuration values can be set as key-value properties
+  ACCEPT_EULA: "Y"
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nat-deployment
+  labels:
+    app: nat
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nat
+  template:
+    metadata:
+      labels:
+        app: nat
+    spec:
+      containers:
+      - name: nat
+        image: softwareag/natural-ce:9.3.2
+        resources:
+          requests:
+            cpu: "250m"
+            memory: "256Mi"
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+        
+        livenessProbe:
+          tcpSocket:
+            port: 2700
+          initialDelaySeconds: 20
+          periodSeconds: 10
+        readinessProbe:
+          tcpSocket:
+            port: 2700
+          initialDelaySeconds: 10
+          periodSeconds: 5
+        envFrom:
+        - configMapRef:
+            name: nat-configmap
+        ports:
+        - containerPort: 2700
+          name: natport
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nat-service
+  labels:
+    app: nat
+spec:
+  selector:
+    app: nat
+  ports:
+    - protocol: TCP
+      port: 2700
+      targetPort: 2700
+      name: natport
+
+  type: LoadBalancer
+

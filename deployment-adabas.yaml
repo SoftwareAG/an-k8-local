@@ -1,0 +1,84 @@
+
+kind: ConfigMap 
+apiVersion: v1 
+metadata:
+  name: adabas-configmap 
+data:
+  # Configuration values can be set as key-value properties
+  ACCEPT_EULA: "Y"
+  ADABAS_DBID: "12"
+  ADABAS_DB_CREATION: "demodb"
+  
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: adabas-deployment
+  labels:
+    app: adabas
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: adabas
+  template:
+    metadata:
+      labels:
+        app: adabas
+    spec:
+      containers:
+      - name: adabas
+        image: softwareag/adabas-ce:7.3.0
+        resources:
+          requests:
+            cpu: "250m"
+            memory: "512Mi"
+          limits:
+            cpu: "500m"
+            memory: "1Gi"
+        livenessProbe:
+          tcpSocket:
+            port: 60001
+          initialDelaySeconds: 20
+          periodSeconds: 10
+        readinessProbe:
+          tcpSocket:
+            port: 60001
+          initialDelaySeconds: 10
+          periodSeconds: 5
+        envFrom:
+        - configMapRef:
+            name: adabas-configmap
+        ports:
+        - containerPort: 60001
+          name: adaport
+        - containerPort: 8190
+          name: http
+        - containerPort: 8191
+          name: https
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: adabas-db
+  labels:
+    app: adabas
+spec:
+  clusterIP: None # Headless Service
+  selector:
+    app: adabas
+  ports:
+    - protocol: TCP
+      port: 60001
+      targetPort: 60001
+      name: adaport
+    - protocol: TCP
+      port: 8190
+      targetPort: 8190
+      name: http
+    - protocol: TCP
+      port: 8191
+      targetPort: 8191
+      name: https
+  

@@ -1,0 +1,68 @@
+kind: ConfigMap 
+apiVersion: v1 
+metadata:
+  name: adabasmanager-configmap
+data:
+  # Configuration values can be set as key-value properties
+  ACCEPT_EULA: "Y"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: adabasmanager-deployment
+  labels:
+    app: adabasmanager
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: adabasmanager
+  template:
+    metadata:
+      labels:
+        app: adabasmanager
+    spec:
+      containers:
+      - name: adabasmanager
+        image: softwareag/adabasmanager-ce:9.3.0
+        resources:
+          requests:
+            cpu: "250m"
+            memory: "256Mi"
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+        livenessProbe:
+          tcpSocket:
+            port: 4990
+          initialDelaySeconds: 20
+          periodSeconds: 10
+        readinessProbe:
+          tcpSocket:
+            port: 4990
+          initialDelaySeconds: 10
+          periodSeconds: 5
+        envFrom:
+        - configMapRef:
+            name: adabasmanager-configmap
+        ports:
+        - containerPort: 4990
+          name: adamgrport
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: adabasmanager-service
+  labels:
+    app: adabasmanager
+spec:
+  selector:
+    app: adabasmanager
+  ports:
+    - protocol: TCP
+      port: 4990
+      targetPort: 4990
+      name: adamgrport
+
+  type: LoadBalancer
