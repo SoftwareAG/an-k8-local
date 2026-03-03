@@ -28,7 +28,7 @@ spec:
     spec:
       containers:
       - name: adabas
-        image: softwareag/adabas-ce:7.3.0
+        image: softwareag/adabas-ce:7.4.0
         resources:
           requests:
             cpu: "250m"
