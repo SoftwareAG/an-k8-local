@@ -25,7 +25,7 @@ spec:
     spec:
       containers:
       - name: nat
-        image: softwareag/natural-ce:9.3.2
+        image: softwareag/natural-ce:9.3.3
         resources:
           requests:
             cpu: "250m"
