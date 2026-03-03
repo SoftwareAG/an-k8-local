@@ -24,7 +24,7 @@ spec:
     spec:
       containers:
       - name: adabasmanager
-        image: softwareag/adabasmanager-ce:9.3.0
+        image: softwareag/adabasmanager-ce:9.4.0
         resources:
           requests:
             cpu: "250m"
