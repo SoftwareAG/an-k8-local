@@ -25,23 +25,7 @@ spec:
       containers:
       - name: adabasmanager
         image: softwareag/adabasmanager-ce:9.4.0
-        resources:
-          requests:
-            cpu: "250m"
-            memory: "256Mi"
-          limits:
-            cpu: "500m"
-            memory: "512Mi"
-        livenessProbe:
-          tcpSocket:
-            port: 4990
-          initialDelaySeconds: 20
-          periodSeconds: 10
-        readinessProbe:
-          tcpSocket:
-            port: 4990
-          initialDelaySeconds: 10
-          periodSeconds: 5
+               
         envFrom:
         - configMapRef:
             name: adabasmanager-configmap
@@ -65,4 +49,4 @@ spec:
       targetPort: 4990
       name: adamgrport
 
-  type: LoadBalancer
+  type: ClusterIP
